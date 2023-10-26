@@ -81,7 +81,7 @@ fn main() {
         Err(err) => print_error(err),
     }
 
-    match print_char('A') {
+    match print_char('\n') {
         Ok(()) => println!("Printed successfully."),
         Err(err) => print_error(err),
     }

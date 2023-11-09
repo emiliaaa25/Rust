@@ -1,4 +1,0 @@
-{"nume": "Constantin", "numar": "0711111111", "ani": 21}
-{"nume": "Mihai", "numar": "0722222222", "ani": 23}
-{"nume": "Elena", "numar": "073333333333", "ani": 25}
-{"nume": "Diana", "numar": "0744444444", "ani": 20}

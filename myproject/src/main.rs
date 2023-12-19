@@ -55,11 +55,73 @@ fn lexing(fun: &str) -> VecDeque<char> {
     vect
 }
 
+struct Stack {
+    stack: Vec<char>,
+}
+
+impl Stack {
+    fn new() -> Stack {
+        Stack { stack: Vec::new() }
+    }
+
+    fn push(&mut self, item: char) {
+        self.stack.push(item);
+    }
+
+    fn pop(&mut self) -> Option<char> {
+        self.stack.pop()
+    }
+
+    fn is_empty(&self) -> bool {
+        self.stack.is_empty()
+    }
+
+    fn top(&self) -> Option<&char> {
+        self.stack.last()
+    }
+}
+
+fn parsing(infixata: &mut VecDeque<char>, postfixata: &mut VecDeque<char>, stack: &mut Stack) {
+    while !infixata.is_empty() {
+        if infixata[0].is_ascii_digit() || infixata[0] == '.' {
+            postfixata.push_back(infixata.pop_front().unwrap());
+            while let Some(&next_char) = infixata.front() {
+                if next_char.is_ascii_digit() || next_char == '.' {
+                    postfixata.push_back(infixata.pop_front().unwrap());
+                } else {
+                    break;
+                }
+            }
+        } else if infixata[0] == ')' {
+            while let Some(ch) = stack.pop() {
+                if ch == '(' {
+                    break;
+                }
+                postfixata.push_back(ch);
+            }
+            infixata.pop_front();
+        } else {
+            while !stack.is_empty() {
+                postfixata.push_back(stack.pop().unwrap());
+            }
+            stack.push(infixata.pop_front().unwrap());
+        }
+    }
+
+}
+
 fn main() {
     println!("Enter a mathematical expression:");
     let mut input = String::new();
     io::stdin().read_line(&mut input).expect("Error reading the input");
 
-    let infixata = lexing(&input);
+    let mut infixata = lexing(&input);
     println!("{:?}", infixata);
+
+    let mut postfixata: VecDeque<char> = VecDeque::new();
+    let mut stack = Stack::new();
+
+    parsing(&mut infixata, &mut postfixata, &mut stack);
+
+    println!("{:?}",postfixata);
 }

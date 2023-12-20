@@ -97,7 +97,21 @@ impl Stack {
         self.stack.last()
     }
 }
-
+fn prioritate(c: char) -> u8 {
+    if c == '+' || c == '-' {
+         return 1;
+    } else if c == '*' || c == '/' {
+        return 2;
+    } else if c == '^' {
+         return 3;
+    } else if c == 's' || c == 'c' || c == 'l' || c == 't' {
+        return 4;
+    } else if c == '(' || c == ')' {
+        return 5;
+    } else {
+        return 0;
+    }
+}
 fn parsing(infixata: &mut VecDeque<char>, postfixata: &mut VecDeque<char>, stack: &mut Stack) {
     while !infixata.is_empty() {
         if infixata[0].is_ascii_digit() || infixata[0] == '.' {
@@ -109,6 +123,9 @@ fn parsing(infixata: &mut VecDeque<char>, postfixata: &mut VecDeque<char>, stack
                     break;
                 }
             }
+            postfixata.push_back(' ');
+        }  else if infixata[0] == '(' {
+            stack.push(infixata.pop_front().unwrap());
         } else if infixata[0] == ')' {
             while let Some(ch) = stack.pop() {
                 if ch == '(' {
@@ -118,7 +135,7 @@ fn parsing(infixata: &mut VecDeque<char>, postfixata: &mut VecDeque<char>, stack
             }
             infixata.pop_front();
         } else {
-            while !stack.is_empty() {
+            while !stack.is_empty() && prioritate(*stack.top().unwrap()) >= prioritate(infixata[0]) {
                 postfixata.push_back(stack.pop().unwrap());
             }
             stack.push(infixata.pop_front().unwrap());
@@ -156,20 +173,23 @@ fn resolving(postfixata: &mut VecDeque<char>, stack1: &mut Stack1) -> f64 {
             while let Some(&ch) = postfixata.front() {
                 if ch.is_ascii_digit() || ch == '.' {
                     val_string.push(postfixata.pop_front().unwrap());
-                }else {
+                }else if ch == ' ' {
+                    postfixata.pop_front(); // Remove the space denoting the end of a number
+                    break;
+                } else {
                     break;
                 }
             }
             let val = val_string.parse::<f64>().unwrap();
             stack1.push(val);
         } else if postfixata[0]=='+'||postfixata[0]=='-'||postfixata[0]=='*'||postfixata[0]=='/'||postfixata[0]=='^' {
-            let val2 = stack1.pop().unwrap();
-            let val1 = stack1.pop().unwrap();
-            let operator1 = postfixata.pop_front().unwrap();
+            let val2 = stack1.pop().unwrap_or_default();
+            let val1 = stack1.pop().unwrap_or_default();
+            let operator1 = postfixata.pop_front().unwrap_or_default();
             let answ = operatie(operator1, val1, val2);
             stack1.push(answ);
         } else if postfixata[0]=='s'||postfixata[0]=='c'||postfixata[0]=='l'||postfixata[0]=='t'||postfixata[0]=='r' {
-            let val1 = stack1.pop().unwrap();
+            let val1 = stack1.pop().unwrap_or_default();
             let operator1 = postfixata.pop_front().unwrap();
             let answ = operatie_speciala(operator1, val1);
             stack1.push(answ);

@@ -58,6 +58,23 @@ fn lexing(fun: &str) -> VecDeque<char> {
 struct Stack {
     stack: Vec<char>,
 }
+struct Stack1 {
+    stack1: Vec<f64>,
+}
+
+impl Stack1 {
+    fn new() -> Stack1 {
+        Stack1 { stack1: Vec::new() }
+    }
+
+    fn push(&mut self, item: f64) {
+        self.stack1.push(item);
+    }
+
+    fn pop(&mut self) -> Option<f64> {
+        self.stack1.pop()
+    }
+}
 
 impl Stack {
     fn new() -> Stack {
@@ -107,7 +124,59 @@ fn parsing(infixata: &mut VecDeque<char>, postfixata: &mut VecDeque<char>, stack
             stack.push(infixata.pop_front().unwrap());
         }
     }
+    while !stack.is_empty() {
+        postfixata.push_back(stack.pop().unwrap());
+    }
 
+}
+fn operatie(r: char, x: f64, y: f64) -> f64 {
+    match r {
+        '+' => x + y,
+        '-' => x - y,
+        '*' => x * y,
+        '/' => x / y,
+        '^' => x.powf(y),
+        _ => panic!("Invalid operator"),
+    }
+}
+fn operatie_speciala(r: char, x: f64) -> f64 {
+    match r {
+        's' => x.sin(),
+        'c' => x.cos(),
+        'l' => x.ln(),
+        't' => x.tan(),
+        'r' => x.sqrt(),
+        _ => panic!("Invalid function"),
+    }
+}
+fn resolving(postfixata: &mut VecDeque<char>, stack1: &mut Stack1) -> f64 {
+    while !postfixata.is_empty() {
+        if postfixata[0].is_ascii_digit() || postfixata[0] == '.' {
+            let mut val_string = String::new();
+            while let Some(&ch) = postfixata.front() {
+                if ch.is_ascii_digit() || ch == '.' {
+                    val_string.push(postfixata.pop_front().unwrap());
+                }else {
+                    break;
+                }
+            }
+            let val = val_string.parse::<f64>().unwrap();
+            stack1.push(val);
+        } else if postfixata[0]=='+'||postfixata[0]=='-'||postfixata[0]=='*'||postfixata[0]=='/'||postfixata[0]=='^' {
+            let val2 = stack1.pop().unwrap();
+            let val1 = stack1.pop().unwrap();
+            let operator1 = postfixata.pop_front().unwrap();
+            let answ = operatie(operator1, val1, val2);
+            stack1.push(answ);
+        } else if postfixata[0]=='s'||postfixata[0]=='c'||postfixata[0]=='l'||postfixata[0]=='t'||postfixata[0]=='r' {
+            let val1 = stack1.pop().unwrap();
+            let operator1 = postfixata.pop_front().unwrap();
+            let answ = operatie_speciala(operator1, val1);
+            stack1.push(answ);
+        }
+    }
+
+    stack1.pop().unwrap()
 }
 
 fn main() {
@@ -124,4 +193,7 @@ fn main() {
     parsing(&mut infixata, &mut postfixata, &mut stack);
 
     println!("{:?}",postfixata);
+    let mut stack1 = Stack1::new();
+    let result = resolving(&mut postfixata, &mut stack1);
+    println!("Result: {}", result);
 }

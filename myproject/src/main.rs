@@ -13,17 +13,18 @@ fn lexing(fun: &str) -> VecDeque<char> {
                 if next_char.is_ascii_digit() || next_char == '.' {
                     vect.push_back(next_char);
                     chars.next();
-                } 
-                else {
+                } else {
                     break;
                 }
             }
-        } 
-        else if c == '+' || c == '-' || c == '*' || c == '/' || c == '^' || c == '(' || c == ')' {
+        } else if c == '+' || c == '-' || c == '*' || c == '/' || c == '^' || c == '(' || c == ')' {
             vect.push_back(c);
             chars.next();
-        }   
-            else {
+             let next_char = chars.peek();
+             if next_char==Some(&c) {
+                chars.next();
+                }
+        } else {
             match c {
                 's' => {
                     if chars.peek() == Some(&'q') {
@@ -70,7 +71,9 @@ impl Stack1 {
     fn push(&mut self, item: f64) {
         self.stack1.push(item);
     }
-
+    fn display(&self) {
+        println!("Stiva: {:?}", self.stack1);
+    }
     fn pop(&mut self) -> Option<f64> {
         self.stack1.pop()
     }
@@ -99,11 +102,11 @@ impl Stack {
 }
 fn prioritate(c: char) -> u8 {
     if c == '+' || c == '-' {
-         return 1;
+        return 1;
     } else if c == '*' || c == '/' {
         return 2;
     } else if c == '^' {
-         return 3;
+        return 3;
     } else if c == 's' || c == 'c' || c == 'l' || c == 't' {
         return 4;
     } else if c == '(' || c == ')' {
@@ -135,7 +138,10 @@ fn parsing(infixata: &mut VecDeque<char>, postfixata: &mut VecDeque<char>, stack
             }
             infixata.pop_front();
         } else if c == '+' || c == '-' || c == '*' || c == '/' || c == '^' {
-            while !stack.is_empty() && prioritate(*stack.top().unwrap()) >= prioritate(c) && *stack.top().unwrap()!='('{
+            while !stack.is_empty()
+                && prioritate(*stack.top().unwrap()) >= prioritate(c)
+                && *stack.top().unwrap() != '('
+            {
                 postfixata.push_back(stack.pop().unwrap());
             }
             stack.push(infixata.pop_front().unwrap());
@@ -147,8 +153,6 @@ fn parsing(infixata: &mut VecDeque<char>, postfixata: &mut VecDeque<char>, stack
         postfixata.push_back(stack.pop().unwrap());
     }
 }
-
-
 
 fn operatie(r: char, x: f64, y: f64) -> f64 {
     match r {
@@ -177,8 +181,8 @@ fn resolving(postfixata: &mut VecDeque<char>, stack1: &mut Stack1) -> f64 {
             while let Some(&ch) = postfixata.front() {
                 if ch.is_ascii_digit() || ch == '.' {
                     val_string.push(postfixata.pop_front().unwrap());
-                }else if ch == ' ' {
-                    postfixata.pop_front(); 
+                } else if ch == ' ' {
+                    postfixata.pop_front();
                     break;
                 } else {
                     break;
@@ -186,18 +190,29 @@ fn resolving(postfixata: &mut VecDeque<char>, stack1: &mut Stack1) -> f64 {
             }
             let val = val_string.parse::<f64>().unwrap();
             stack1.push(val);
-        } else if postfixata[0]=='+'||postfixata[0]=='-'||postfixata[0]=='*'||postfixata[0]=='/'||postfixata[0]=='^' {
+        } else if postfixata[0] == '+'
+            || postfixata[0] == '-'
+            || postfixata[0] == '*'
+            || postfixata[0] == '/'
+            || postfixata[0] == '^'
+        {
             let val2 = stack1.pop().unwrap_or_default();
             let val1 = stack1.pop().unwrap_or_default();
             let operator1 = postfixata.pop_front().unwrap_or_default();
             let answ = operatie(operator1, val1, val2);
             stack1.push(answ);
-        } else if postfixata[0]=='s'||postfixata[0]=='c'||postfixata[0]=='l'||postfixata[0]=='t'||postfixata[0]=='r' {
+        } else if postfixata[0] == 's'
+            || postfixata[0] == 'c'
+            || postfixata[0] == 'l'
+            || postfixata[0] == 't'
+            || postfixata[0] == 'r'
+        {
             let val1 = stack1.pop().unwrap_or_default();
             let operator1 = postfixata.pop_front().unwrap();
             let answ = operatie_speciala(operator1, val1);
             stack1.push(answ);
         }
+        println!("{:?}",stack1.display());
     }
 
     stack1.pop().unwrap()
@@ -206,7 +221,9 @@ fn resolving(postfixata: &mut VecDeque<char>, stack1: &mut Stack1) -> f64 {
 fn main() {
     println!("Enter a mathematical expression:");
     let mut input = String::new();
-    io::stdin().read_line(&mut input).expect("Error reading the input");
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Error reading the input");
 
     let mut infixata = lexing(&input);
     println!("{:?}", infixata);
@@ -216,7 +233,7 @@ fn main() {
 
     parsing(&mut infixata, &mut postfixata, &mut stack);
 
-    println!("{:?}",postfixata);
+    println!("{:?}", postfixata);
     let mut stack1 = Stack1::new();
     let result = resolving(&mut postfixata, &mut stack1);
     println!("Result: {}", result);

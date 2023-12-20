@@ -113,39 +113,43 @@ fn prioritate(c: char) -> u8 {
     }
 }
 fn parsing(infixata: &mut VecDeque<char>, postfixata: &mut VecDeque<char>, stack: &mut Stack) {
-    while !infixata.is_empty() {
-        if infixata[0].is_ascii_digit() || infixata[0] == '.' {
-            postfixata.push_back(infixata.pop_front().unwrap());
-            while let Some(&next_char) = infixata.front() {
-                if next_char.is_ascii_digit() || next_char == '.' {
+    while let Some(&c) = infixata.front() {
+        if c.is_ascii_digit() || c == '.' {
+            while let Some(&digit) = infixata.front() {
+                if digit.is_ascii_digit() || digit == '.' {
                     postfixata.push_back(infixata.pop_front().unwrap());
                 } else {
                     break;
                 }
             }
             postfixata.push_back(' ');
-        }  else if infixata[0] == '(' {
+        } else if c == '(' {
             stack.push(infixata.pop_front().unwrap());
-        } else if infixata[0] == ')' {
-            while let Some(ch) = stack.pop() {
-                if ch == '(' {
+        } else if c == ')' {
+            while let Some(&top_char) = stack.top() {
+                if top_char == '(' {
+                    stack.pop();
                     break;
                 }
-                postfixata.push_back(ch);
+                postfixata.push_back(stack.pop().unwrap());
             }
             infixata.pop_front();
-        } else {
-            while !stack.is_empty() && prioritate(*stack.top().unwrap()) >= prioritate(infixata[0]) {
+        } else if c == '+' || c == '-' || c == '*' || c == '/' || c == '^' {
+            while !stack.is_empty() && prioritate(*stack.top().unwrap()) >= prioritate(c) && *stack.top().unwrap()!='('{
                 postfixata.push_back(stack.pop().unwrap());
             }
             stack.push(infixata.pop_front().unwrap());
+        } else {
+            infixata.pop_front();
         }
     }
     while !stack.is_empty() {
         postfixata.push_back(stack.pop().unwrap());
     }
-
 }
+
+
+
 fn operatie(r: char, x: f64, y: f64) -> f64 {
     match r {
         '+' => x + y,
@@ -174,7 +178,7 @@ fn resolving(postfixata: &mut VecDeque<char>, stack1: &mut Stack1) -> f64 {
                 if ch.is_ascii_digit() || ch == '.' {
                     val_string.push(postfixata.pop_front().unwrap());
                 }else if ch == ' ' {
-                    postfixata.pop_front(); // Remove the space denoting the end of a number
+                    postfixata.pop_front(); 
                     break;
                 } else {
                     break;

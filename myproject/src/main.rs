@@ -71,9 +71,7 @@ impl Stack1 {
     fn push(&mut self, item: f64) {
         self.stack1.push(item);
     }
-    fn display(&self) {
-        println!("Stiva: {:?}", self.stack1);
-    }
+    
     fn pop(&mut self) -> Option<f64> {
         self.stack1.pop()
     }
@@ -174,7 +172,7 @@ fn operatie_speciala(r: char, x: f64) -> f64 {
         _ => panic!("Invalid function"),
     }
 }
-fn resolving(postfixata: &mut VecDeque<char>, stack1: &mut Stack1) -> f64 {
+fn resolving(postfixata: &mut VecDeque<char>, stack1: &mut Stack1,infixata1: &mut VecDeque<char>) -> f64 {
     while !postfixata.is_empty() {
         if postfixata[0].is_ascii_digit() || postfixata[0] == '.' {
             let mut val_string = String::new();
@@ -198,9 +196,31 @@ fn resolving(postfixata: &mut VecDeque<char>, stack1: &mut Stack1) -> f64 {
         {
             let val2 = stack1.pop().unwrap_or_default();
             let val1 = stack1.pop().unwrap_or_default();
+            let val22:Vec<char> = val2.to_string().chars().collect();
+            let val11:Vec<char> = val1.to_string().chars().collect();
             let operator1 = postfixata.pop_front().unwrap_or_default();
             let answ = operatie(operator1, val1, val2);
+            let answ_str:String=answ.to_string();
+            let chars:Vec<char>=answ_str.chars().collect();
             stack1.push(answ);
+            let mut i = 0;
+
+            while i < infixata1.len() - 1{
+                if infixata1.get(i) == Some(&val11[0]) && infixata1.get(i + 1) == Some(&operator1) && infixata1.get(i + 2) == Some(&val22[0]){
+                    infixata1.remove(i);
+                    infixata1.remove(i);
+                    infixata1.remove(i);
+                    infixata1.insert(i, chars[0]);
+
+                                }
+                                else {
+                    i += 1;
+                }
+
+            }
+            println!("{:?}",infixata1);
+
+
         } else if postfixata[0] == 's'
             || postfixata[0] == 'c'
             || postfixata[0] == 'l'
@@ -212,7 +232,7 @@ fn resolving(postfixata: &mut VecDeque<char>, stack1: &mut Stack1) -> f64 {
             let answ = operatie_speciala(operator1, val1);
             stack1.push(answ);
         }
-        println!("{:?}",stack1.display());
+
     }
 
     stack1.pop().unwrap()
@@ -221,20 +241,21 @@ fn resolving(postfixata: &mut VecDeque<char>, stack1: &mut Stack1) -> f64 {
 fn main() {
     println!("Enter a mathematical expression:");
     let mut input = String::new();
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Error reading the input");
+    io::stdin().read_line(&mut input).expect("Error reading the input");
 
     let mut infixata = lexing(&input);
-    println!("{:?}", infixata);
+    let mut infixata1 = lexing(&input);
+
+    //println!("{:?}", infixata);
+
 
     let mut postfixata: VecDeque<char> = VecDeque::new();
     let mut stack = Stack::new();
 
     parsing(&mut infixata, &mut postfixata, &mut stack);
 
-    println!("{:?}", postfixata);
+    //println!("{:?}", postfixata);
     let mut stack1 = Stack1::new();
-    let result = resolving(&mut postfixata, &mut stack1);
+    let result = resolving(&mut postfixata, &mut stack1, &mut infixata1);
     println!("Result: {}", result);
 }

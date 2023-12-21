@@ -1,5 +1,7 @@
 use std::collections::VecDeque;
 use std::io;
+use std::env;
+
 
 fn lexing(fun: &str) -> VecDeque<char> {
     let mut vect = VecDeque::new();
@@ -316,11 +318,20 @@ fn resolving(
 }
 
 fn main() {
-    println!("Enter a mathematical expression:");
+    let args: Vec<String> = env::args().collect();
     let mut input = String::new();
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Error reading the input");
+
+    if args.len() < 2 {
+        println!("Enter a mathematical expression:");
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Error reading the input");
+    
+    }
+    else {
+        input=args[1].clone();
+    }
+   
 
     let mut infixata = lexing(&input);
     let mut infixata1 = lexing(&input);
@@ -328,7 +339,6 @@ fn main() {
     let mut stack = Stack::new();
    
     parsing(&mut infixata, &mut postfixata, &mut stack);
-    println!("{:?}", postfixata); 
     let mut stack1 = Stack1::new();
     let result = resolving(&mut postfixata, &mut stack1, &mut infixata1);
     println!("Result: {}", result);

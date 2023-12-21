@@ -100,17 +100,17 @@ impl Stack {
 }
 fn prioritate(c: char) -> u8 {
     if c == '+' || c == '-' {
-        return 1;
+        1
     } else if c == '*' || c == '/' {
-        return 2;
+        2
     } else if c == '^' {
-        return 3;
+        3
     } else if c == 's' || c == 'c' || c == 'l' || c == 't' {
-        return 4;
+        4
     } else if c == '(' || c == ')' {
-        return 5;
+        5
     } else {
-        return 0;
+        0
     }
 }
 fn parsing(infixata: &mut VecDeque<char>, postfixata: &mut VecDeque<char>, stack: &mut Stack) {
@@ -138,7 +138,6 @@ fn parsing(infixata: &mut VecDeque<char>, postfixata: &mut VecDeque<char>, stack
         } else if c == ')' && stack.top() == Some(&'(') {
             stack.pop();
             postfixata.push_back(stack.pop().unwrap());
-            println!("{:?}", infixata);
         } else if c == '+'
             || c == '-'
             || c == '*'
@@ -216,7 +215,7 @@ fn update_and_print_infixata1(
             }
             if i > 0
                 && infixata1.get(i - 1) == Some(&'(')
-                && infixata1.get(i + replace_with_chars.len()) == Some(&')')
+                && infixata1.get(i + replace_with_chars.len()) == Some(&')') 
             {
                 infixata1.remove(i + replace_with_chars.len());
                 infixata1.remove(i - 1);
@@ -234,6 +233,7 @@ fn update_and_print_infixata1_special(
     val1: f64,
     result: f64,
 ) {
+    
     let val1_str = val1.to_string();
     let result_str = result.to_string();
 
@@ -250,21 +250,21 @@ fn update_and_print_infixata1_special(
         if infixata1
             .range(i..i + replace_from_chars.len())
             .eq(replace_from_chars.iter())
+
+
         {
-            infixata1.drain(i..i + replace_from_chars.len());
-            if i > 0 && infixata1.get(i - 1) == Some(&'(') && infixata1.get(i) == Some(&')') {
-                infixata1.remove(i);
-                infixata1.remove(i - 1);
-            }
+            infixata1.drain(i..i + replace_from_chars.len()-1);
             for ch in replace_with_chars.iter().rev() {
                 infixata1.insert(i, *ch);
             }
+        
             break;
-        }
+        }   
     }
 
     println!("= {}", infixata1.iter().collect::<String>());
 }
+
 
 fn resolving(
     postfixata: &mut VecDeque<char>,
@@ -326,9 +326,9 @@ fn main() {
     let mut infixata1 = lexing(&input);
     let mut postfixata: VecDeque<char> = VecDeque::new();
     let mut stack = Stack::new();
-
+   
     parsing(&mut infixata, &mut postfixata, &mut stack);
-    println!("{:?}", postfixata);
+    println!("{:?}", postfixata); 
     let mut stack1 = Stack1::new();
     let result = resolving(&mut postfixata, &mut stack1, &mut infixata1);
     println!("Result: {}", result);

@@ -126,7 +126,7 @@ fn parsing(infixata: &mut VecDeque<char>, postfixata: &mut VecDeque<char>, stack
             postfixata.push_back(' ');
         } else if c == '(' {
             stack.push(infixata.pop_front().unwrap());
-        } else if c == ')' {
+        } else if c == ')' && stack.top() != Some(&'(') {
             while let Some(&top_char) = stack.top() {
                 if top_char == '(' {
                     stack.pop();
@@ -135,6 +135,10 @@ fn parsing(infixata: &mut VecDeque<char>, postfixata: &mut VecDeque<char>, stack
                 postfixata.push_back(stack.pop().unwrap());
             }
             infixata.pop_front();
+        } else if c == ')' && stack.top() == Some(&'(') {
+            stack.pop();
+            postfixata.push_back(stack.pop().unwrap());
+            println!("{:?}", infixata);
         } else if c == '+'
             || c == '-'
             || c == '*'
@@ -324,7 +328,7 @@ fn main() {
     let mut stack = Stack::new();
 
     parsing(&mut infixata, &mut postfixata, &mut stack);
-
+    println!("{:?}", postfixata);
     let mut stack1 = Stack1::new();
     let result = resolving(&mut postfixata, &mut stack1, &mut infixata1);
     println!("Result: {}", result);
